@@ -1,0 +1,10 @@
+<% %w[development test].each do |env| %>
+  <%= env %>:
+    adapter: postgresql
+    encoding: unicode
+    database: vagrant_<%= env %>
+    host: localhost
+    pool: 5
+    username: postgres
+    password: <%= @password %>
+<% end %>
