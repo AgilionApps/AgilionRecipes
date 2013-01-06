@@ -1,17 +1,19 @@
 post_install_commands = []
 
-
 ##
 # Interactively Install Gems
 #
-gem 'jquery-rails'
-gem 'simple-form'
-gem 'pg'
-
 if yes?('Use Omni-auth for auth?')
-  gem 'omni-auth'
+  gem 'omniauth'
 elsif yes?('Use Devise for auth?')
   gem 'devise'
+end
+
+if yes?('Use Backbone.js?')
+  gem 'backbone-on-rails'
+  gem 'backbone-support'
+  post_install_commands << 'rails g backbone:install -j'
+  #TODO: Setup backbone file structures with .gitkeeps, js requires.
 end
 
 gem_group :development, :test do
@@ -23,18 +25,15 @@ gem_group :development do
   gem 'foreman'
 end
 
-gem_group :assets do
-  gem 'compass-rails'
+if yes?('Use Compass?')
+  gem 'compass-rails', group: [:assets]
+  post_install_commands << 'compass init'
+
   if yes?('Use Boostrap?')
     gem 'bootstrap-sass'
-    gem 'compass_twitter_bootstrap', git: 'https://github.com/vwall/compass-twitter-bootstrap.git'
+    # Todo: Set up css requires.
+    # append_to_file 'not_sure.css', "@import 'bootstrap';"
   end
-end
-
-if yes?('Use Backbone.js?')
-  gem 'backbone-on-rails'
-  gem 'backbone-support'
-  post_install_commands << 'rails g backbone:install -j'
 end
 
 
@@ -89,6 +88,8 @@ cookbook 'standard_packages', git: 'https://github.com/AgilionApps/AgilionRecipe
 cookbook 'postgres_vagrant', git: 'https://github.com/AgilionApps/AgilionRecipes'
   CHEF
 end
+
+run 'librarian-chef install'
 
 ##
 # Add default vagrant config file.
