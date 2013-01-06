@@ -1,0 +1,9 @@
+<% %w[development test].each do |env| %>
+  <%= env %>:
+    adapter: mysql2
+    encoding: utf8
+    database: vagrant_<%= env %>
+    host: localhost
+    username: root
+    password: <%= @password %>
+<% end %>
