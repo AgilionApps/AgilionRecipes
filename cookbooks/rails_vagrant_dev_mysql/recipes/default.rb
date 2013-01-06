@@ -20,7 +20,7 @@ template '/vagrant/config/database.yml' do
   group 'vagrant'
   mode 0744
   variables({
-    :password => node['mysql']['password']['postgres']
+    :password => node['mysql']['server_root_password']
   })
 end
 
