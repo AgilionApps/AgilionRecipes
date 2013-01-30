@@ -81,11 +81,24 @@ cookbook 'apt'
 cookbook 'build-essential'
 cookbook 'postgresql'
 
-cookbook 'rvm', git: 'https://github.com/fnichol/chef-rvm'
+cookbook 'rvm',
+  git: 'https://github.com/fnichol/chef-rvm',
+  ref: 'v0.9.0'
 
-cookbook 'rails_vagrant_dev', git: 'https://github.com/AgilionApps/AgilionRecipes'
-cookbook 'standard_packages', git: 'https://github.com/AgilionApps/AgilionRecipes'
-cookbook 'postgres_vagrant', git: 'https://github.com/AgilionApps/AgilionRecipes'
+cookbook 'postgres_vagrant',
+  git: 'https://github.com/AgilionApps/AgilionRecipes',
+  path: 'cookbooks/postgres_vagrant',
+  ref: '0.2.0'
+
+cookbook 'standard_packages',
+  git: 'https://github.com/AgilionApps/AgilionRecipes',
+  path: 'cookbooks/standard_packages',
+  ref: '0.2.0'
+
+cookbook 'rails_development',
+  git: 'https://github.com/AgilionApps/AgilionRecipes',
+  path: 'cookbooks/rails_development',
+  ref: '0.2.0'
   CHEF
 end
 
@@ -121,14 +134,19 @@ Vagrant::Config.run do |config|
     chef.add_recipe 'rvm::vagrant'
     chef.add_recipe 'rvm::user_install'
     chef.add_recipe 'standard_packages'
-    chef.add_recipe 'rails_vagrant_dev'
+    chef.add_recipe 'rails_development::postgres'
 
     chef.json = {
       'postgresql' => {
         'password' => { 'postgres' => '#{password}' }
       },
       'rvm' => {
-        'user_installs' => [{ 'user' => 'vagrant' }]
+        'branch' => 'none',
+        'version' => '1.17.10',
+        'user_installs' => [{
+          'user' => 'vagrant',
+          'default_ruby' => 'ruby-1.9.3-p374'
+        }],
       }
     }
   end
