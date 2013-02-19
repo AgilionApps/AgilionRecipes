@@ -25,6 +25,14 @@ gem_group :development do
   gem 'foreman'
 end
 
+if yes?('Use cucumber?')
+  gem_group :test do
+    gem 'cucumber-rails', :require => false
+    gem 'database_cleaner'
+  end
+  post_install_commands << 'rails g cucumber:install'
+end
+
 if yes?('Use Compass?')
   gem 'compass-rails', group: [:assets]
   post_install_commands << 'compass init'
@@ -45,7 +53,7 @@ append_to_file '.gitignore' do
     /config/database.yml
     /cookbooks
     .vagrant
-  ].join('\n')
+  ].join("\n")
 end
 
 
@@ -168,7 +176,7 @@ This will take approx 20-40 minutes depending on your hardware.
 
 Once booted ssh to the server with 'vagrant ssh' and execute the following:
 
-#{post_install_commands.join('/n')}
+#{post_install_commands.join("\n")}
 
 Have Fun!
 INSTRUCTIONS
