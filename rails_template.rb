@@ -1,4 +1,5 @@
 post_install_commands = []
+@cucumber = false
 
 ##
 # Interactively Install Gems
@@ -26,6 +27,7 @@ gem_group :development do
 end
 
 if yes?('Use cucumber?')
+  @cucumber = true
   gem_group :test do
     gem 'cucumber-rails', :require => false
     gem 'database_cleaner'
@@ -62,18 +64,47 @@ end
 #
 remove_file 'README'
 remove_file 'README.rdoc'
-create_file 'README.rdoc' do
+create_file 'README.md' do
   <<-RDOC
 
 # #{@app_name}
 
-By Agilion Apps
-
-## Description
-
-TODO
+Application developed by [Agilion Apps](http://agilionapps.com/)
 
 ## Development Setup
+
+Development of the application was done using [Vagrant](http://www.vagrantup.com/).
+Follow these steps to get a Vagrant virtual machine up and running.
+
+1. Install Vagrant and VirtualBox. See instructions at [vagrantup.com](http://docs.vagrantup.com/v1/docs/getting-started/index.html)
+2. Install the librarian gem: `gem install librarian`
+3. Run: `librarian-chef install`
+4. Setup the VM: `vagrant up`
+5. SSH into VM: `vagrant ssh`
+
+## Development Commands
+
+All development commands such as installing gems and running database
+migrations must be done from within the Virtual Machine:
+
+1. SSH into VM: `vagrant ssh`
+2. Change into working directory: `cd /vagrant`
+3. Run database migrations: `rake db:migrate`
+4. Import seed data: `rake db:seed`
+5. Startup Rails server: `rails s`
+6. Startup Rails console: `rails c`
+
+## Running Automated Tests
+
+The application has a number of unit tests (RSpec) #{"and integration tests
+(Cucumber)" if @cucumber} that should be run after making changes to the application
+and before deploying.
+
+1. SSH into VM: `vagrant ssh`
+2. Change into working directory: `cd /vagrant`
+2. Setup test database: `rake db:test:prepare`
+4. Run unit tests: `rspec`
+#{5. Run integration tests: `cucumber` if @cucumber}
 
   RDOC
 end
