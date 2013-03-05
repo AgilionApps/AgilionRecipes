@@ -2,6 +2,22 @@ post_install_commands = []
 @cucumber = false
 
 ##
+# Standard Gems
+#
+gem 'has_scope'
+gem 'kaminari'
+
+gem_group :development, :test do
+  gem 'debugger'
+  gem 'rspec-rails'
+  gem 'fabrication'
+end
+
+gem_group :development do
+  gem 'foreman'
+end
+
+##
 # Interactively Install Gems
 #
 if yes?('Use Omni-auth for auth?')
@@ -17,14 +33,11 @@ if yes?('Use Backbone.js?')
   #TODO: Setup backbone file structures with .gitkeeps, js requires.
 end
 
-gem_group :development, :test do
-  gem 'debugger'
-  gem 'rspec-rails'
+if yes?('Use Ember.js?')
+  gem 'ember-rails'
+  gem 'active_model_serializers'
 end
 
-gem_group :development do
-  gem 'foreman'
-end
 
 if yes?('Use cucumber?')
   @cucumber = true
@@ -35,17 +48,18 @@ if yes?('Use cucumber?')
   post_install_commands << 'rails g cucumber:install'
 end
 
-if yes?('Use Compass?')
-  gem 'compass-rails', group: [:assets]
-  post_install_commands << 'compass init'
+if yes?('Use Boostrap?')
+  gem 'bootstrap-sass'
+  create_file 'app/assets/stylesheets/main.css.scss' do
+    <<-SCSS
+@import 'bootstrap'; // Imports bootstrap to allow mixins and extends.
 
-  if yes?('Use Boostrap?')
-    gem 'bootstrap-sass'
-    # Todo: Set up css requires.
-    # append_to_file 'not_sure.css', "@import 'bootstrap';"
+#app {
+
+}
+    SCSS
   end
 end
-
 
 ##
 # Add common files to git ignore.
@@ -58,9 +72,23 @@ append_to_file '.gitignore' do
   ].join("\n")
 end
 
+##
+# Add Fabrication to generators
+#
+inject_into_file 'config/application.rb', before: '  end' do
+  <<-CONFIG
+
+    # Generate fabrication fixtures when generating model
+    config.generators do |g|
+      g.test_framework :rspec, fixture: true
+      g.fixture_replacement :fabrication
+    end
+
+  CONFIG
+end
 
 ##
-# Remove default README, replace with application name and todo.
+# Remove default README, replace with custom info
 #
 remove_file 'README'
 remove_file 'README.rdoc'
