@@ -117,9 +117,8 @@ migrations must be done from within the Virtual Machine:
 
 1. SSH into VM: `vagrant ssh`
 2. Change into working directory: `cd /vagrant`
-3. Setup and seed the database: `rake db:setup`
-4. Startup Rails server: `rails s`
-5. Startup Rails console: `rails c`
+3. Startup Rails server: `rails s`
+4. Startup Rails console: `rails c`
 
 ## Running Automated Tests
 
