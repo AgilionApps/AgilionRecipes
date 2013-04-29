@@ -6,6 +6,7 @@ post_install_commands = []
 #
 gem 'has_scope'
 gem 'kaminari'
+gem 'unicorn'
 
 gem_group :development, :test do
   gem 'debugger'
@@ -153,21 +154,21 @@ cookbook 'rvm',
 cookbook 'postgres_vagrant',
   git: 'https://github.com/AgilionApps/AgilionRecipes',
   path: 'cookbooks/postgres_vagrant',
-  ref: '0.2.0'
+  ref: '0.3.0'
 
 cookbook 'standard_packages',
   git: 'https://github.com/AgilionApps/AgilionRecipes',
   path: 'cookbooks/standard_packages',
-  ref: '0.2.0'
+  ref: '0.3.0'
 
 cookbook 'rails_development',
   git: 'https://github.com/AgilionApps/AgilionRecipes',
   path: 'cookbooks/rails_development',
-  ref: '0.2.0'
+  ref: '0.3.0'
   CHEF
 end
 
-run 'librarian-chef install'
+
 
 ##
 # Add default vagrant config file.
@@ -192,7 +193,7 @@ Vagrant::Config.run do |config|
 
   # Provision with chef (solo)
   config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = ['cookbooks', 'agilion_recipes/cookbooks']
+    chef.cookbooks_path = ['cookbooks']
     chef.add_recipe 'apt'
     chef.add_recipe 'build-essential'
     chef.add_recipe 'postgres_vagrant'
@@ -222,8 +223,50 @@ end
 
 
 ##
-# Print final setup instructions.
+# Add default unicorn config files for Heroku.
+#
+create_file 'config/unicorn.rb' do
+  <<-UNICORN
+    worker_processes 3
+    timeout 15
+    preload_app true
 
+    before_fork do |server, worker|
+
+      Signal.trap 'TERM' do
+        puts 'Unicorn master intercepting TERM and sending myself QUIT instead'
+        Process.kill 'QUIT', Process.pid
+      end
+
+      defined?(ActiveRecord::Base) and
+        ActiveRecord::Base.connection.disconnect!
+    end
+
+    after_fork do |server, worker|
+
+      Signal.trap 'TERM' do
+        puts 'Unicorn worker intercepting TERM and doing nothing. Wait for master to send QUIT'
+      end
+
+      defined?(ActiveRecord::Base) and
+        ActiveRecord::Base.establish_connection
+    end
+  UNICORN
+end
+
+##
+# Add default Procfile for Heroku.
+#
+create_file 'config/unicorn.rb' do
+  'web: bundle exec unicorn -p $PORT -c ./config/unicorn.rb'
+end
+
+
+run 'librarian-chef install'
+
+##
+# Print final setup instructions.
+#
 puts <<-INSTRUCTIONS
 
 Application #{@app_name} generated at #{@app_path}.
