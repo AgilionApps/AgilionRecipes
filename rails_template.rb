@@ -148,8 +148,7 @@ cookbook 'build-essential'
 cookbook 'postgresql'
 
 cookbook 'rvm',
-  git: 'https://github.com/fnichol/chef-rvm',
-  ref: 'v0.9.0'
+  git: 'https://github.com/fnichol/chef-rvm'
 
 cookbook 'postgres_vagrant',
   git: 'https://github.com/AgilionApps/AgilionRecipes',
@@ -176,20 +175,21 @@ end
 create_file 'Vagrantfile' do
   password = [*('a'..'z')].sample(20).join
   <<-VAGRANT
-
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant::Config.run do |config|
-
+Vagrant.configure("2") do |config|
   config.vm.box = '#{@app_name.downcase.gsub(/\s/,'')}'
   config.vm.box_url = 'http://files.vagrantup.com/precise64.box'
 
-  # Forward default rails server port to host 3001
-  config.vm.forward_port 3000, 3001
+  config.vm.network :private_network, ip: '10.10.10.10'
+  config.vm.network :forwarded_port, guest: 3000, host: 3001
 
-  # Boost memory to make it a bit quicker, default 512mb
-  # config.vm.customize ["modifyvm", :id, "--memory", 2048]
+  config.vm.synced_folder '.', '/vagrant', nfs: true
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ["modifyvm", :id, "--memory", "1024"]
+  end
 
   # Provision with chef (solo)
   config.vm.provision :chef_solo do |chef|
@@ -216,8 +216,8 @@ Vagrant::Config.run do |config|
       }
     }
   end
-end
 
+end
   VAGRANT
 end
 
