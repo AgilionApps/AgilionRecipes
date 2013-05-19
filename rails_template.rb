@@ -106,10 +106,17 @@ Development of the application was done using [Vagrant](http://www.vagrantup.com
 Follow these steps to get a Vagrant virtual machine up and running.
 
 1. Install Vagrant and VirtualBox. See instructions at [vagrantup.com](http://docs.vagrantup.com/v1/docs/getting-started/index.html)
-2. Install the librarian gem: `gem install librarian`
-3. Run: `librarian-chef install`
+2. Install Berkshelf for managing chef cookbooks: `gem install berkshelf`
+3. Install vagrant berkshelf plugin: `vagrant plugin install vagrant-berkshelf`
 4. Setup the VM: `vagrant up`
 5. SSH into VM: `vagrant ssh`
+
+From your host you can now use:
+
+* `vagrant suspend` and `vagrant resume` to quickly pause and re-open your VM.
+* `vagrant halt` to shutdown your VM, `vagrant up` to re-boot it.
+* `vagrant destroy` to shutdown and delete your VM and free up disk space, `vagrant up` to re-create.
+* `vagrant reload` to restart and re-provision your VM.
 
 ## Development Commands
 
@@ -131,7 +138,7 @@ and before deploying.
 2. Change into working directory: `cd /vagrant`
 2. Setup test database: `rake db:test:prepare`
 4. Run unit tests: `rspec`
-#{5. Run integration tests: `cucumber` if @cucumber}
+#{'5. Run integration tests: `cucumber`' if @cucumber}
 
   RDOC
 end
@@ -139,31 +146,31 @@ end
 ##
 # Add default chef config file.
 #
-create_file 'Cheffile' do
+create_file 'Berksfile' do
   <<-CHEF
-site 'http://community.opscode.com/api/v1'
+site :opscode
 
 cookbook 'apt'
 cookbook 'build-essential'
 cookbook 'postgresql'
 
 cookbook 'rvm',
-  git: 'https://github.com/fnichol/chef-rvm'
+  github: 'fnichol/chef-rvm'
 
 cookbook 'postgres_vagrant',
-  git: 'https://github.com/AgilionApps/AgilionRecipes',
-  path: 'cookbooks/postgres_vagrant',
-  ref: '0.3.0'
+  github: 'AgilionApps/AgilionRecipes',
+  rel: 'cookbooks/postgres_vagrant',
+  ref: '0.4.0'
 
 cookbook 'standard_packages',
-  git: 'https://github.com/AgilionApps/AgilionRecipes',
-  path: 'cookbooks/standard_packages',
-  ref: '0.3.0'
+  github: 'AgilionApps/AgilionRecipes',
+  rel: 'cookbooks/standard_packages',
+  ref: '0.4.0'
 
 cookbook 'rails_development',
-  git: 'https://github.com/AgilionApps/AgilionRecipes',
-  path: 'cookbooks/rails_development',
-  ref: '0.3.0'
+  github: 'AgilionApps/AgilionRecipes',
+  rel: 'cookbooks/rails_development',
+  ref: '0.4.0'
   CHEF
 end
 
@@ -179,8 +186,8 @@ create_file 'Vagrantfile' do
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = '#{@app_name.downcase.gsub(/\s/,'')}'
-  config.vm.box_url = 'http://files.vagrantup.com/precise64.box'
+  config.vm.box = 'ruby_base'
+  config.vm.box_url = 'https://www.dropbox.com/s/47tb2867l7jfwok/ruby_base.box'
 
   config.vm.network :private_network, ip: '10.10.10.10'
   config.vm.network :forwarded_port, guest: 3000, host: 3001
@@ -191,14 +198,15 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
   end
 
+  config.berkshelf.enabled = true
+
   # Provision with chef (solo)
   config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = ['cookbooks']
     chef.add_recipe 'apt'
     chef.add_recipe 'build-essential'
     chef.add_recipe 'postgres_vagrant'
     chef.add_recipe 'rvm::vagrant'
-    chef.add_recipe 'rvm::user_install'
+    chef.add_recipe 'rvm::system_install'
     chef.add_recipe 'standard_packages'
     chef.add_recipe 'rails_development::postgres'
 
@@ -207,12 +215,7 @@ Vagrant.configure("2") do |config|
         'password' => { 'postgres' => '#{password}' }
       },
       'rvm' => {
-        'branch' => 'none',
-        'version' => '1.17.10',
-        'user_installs' => [{
-          'user' => 'vagrant',
-          'default_ruby' => 'ruby-1.9.3-p374'
-        }],
+        'default_ruby' => '2.0.0'
       }
     }
   end
@@ -257,12 +260,9 @@ end
 ##
 # Add default Procfile for Heroku.
 #
-create_file 'config/unicorn.rb' do
+create_file 'Procfile' do
   'web: bundle exec unicorn -p $PORT -c ./config/unicorn.rb'
 end
-
-
-run 'librarian-chef install'
 
 ##
 # Print final setup instructions.
