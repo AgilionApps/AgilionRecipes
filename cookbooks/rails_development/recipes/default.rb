@@ -3,10 +3,6 @@ rvm_settings = node['rvm']
 ruby_version = rvm_settings['default_ruby'] || '2.0.0'
 ruby_and_gemset = "#{ruby_version}@vagrant"
 
-rvm_default_ruby ruby_and_gemset do
-  action :create
-end
-
 # Install node.js for JS compilation.
 package 'nodejs' do
   action :install

@@ -206,7 +206,7 @@ Vagrant.configure("2") do |config|
     chef.add_recipe 'build-essential'
     chef.add_recipe 'postgres_vagrant'
     chef.add_recipe 'rvm::vagrant'
-    chef.add_recipe 'rvm::system_install'
+    chef.add_recipe 'rvm::system'
     chef.add_recipe 'standard_packages'
     chef.add_recipe 'rails_development::postgres'
 
@@ -215,7 +215,7 @@ Vagrant.configure("2") do |config|
         'password' => { 'postgres' => '#{password}' }
       },
       'rvm' => {
-        'default_ruby' => '2.0.0'
+        'default_ruby' => '2.0.0@vagrant'
       }
     }
   end
