@@ -1,0 +1,13 @@
+site :opscode
+
+cookbook 'apt'
+cookbook 'build-essential'
+cookbook 'postgresql'
+
+cookbook 'rvm',
+  github: 'fnichol/chef-rvm'
+
+cookbook 'standard_packages',
+  github: 'AgilionApps/AgilionRecipes',
+  rel: 'cookbooks/standard_packages',
+  ref: '0.3.0'
