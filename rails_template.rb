@@ -28,8 +28,9 @@ elsif yes?('Use Devise for auth?')
 end
 
 if yes?('Use Backbone.js?')
+  gem 'active_model_serializers'
   gem 'backbone-on-rails'
-  gem 'backbone-support'
+  gem 'marionette-rails'
   post_install_commands << 'rails g backbone:install -j'
   #TODO: Setup backbone file structures with .gitkeeps, js requires.
 end
@@ -38,7 +39,6 @@ if yes?('Use Ember.js?')
   gem 'ember-rails'
   gem 'active_model_serializers'
 end
-
 
 if yes?('Use cucumber?')
   @cucumber = true
@@ -105,11 +105,12 @@ Application developed by [Agilion Apps](http://agilionapps.com/)
 Development of the application was done using [Vagrant](http://www.vagrantup.com/).
 Follow these steps to get a Vagrant virtual machine up and running.
 
-1. Install Vagrant and VirtualBox. See instructions at [vagrantup.com](http://docs.vagrantup.com/v1/docs/getting-started/index.html)
-2. Install Berkshelf for managing chef cookbooks: `gem install berkshelf`
-3. Install vagrant berkshelf plugin: `vagrant plugin install vagrant-berkshelf`
-4. Setup the VM: `vagrant up`
-5. SSH into VM: `vagrant ssh`
+1. Install Vagrant (~> 1.2.2) and VirtualBox. See instructions at [vagrantup.com](http://docs.vagrantup.com/v1/docs/getting-started/index.html)
+2. Install vagrant berkshelf (~> 1.3.2) plugin: `vagrant plugin install vagrant-berkshelf`
+3. Setup the VM: `vagrant up` (will require your password)
+4. SSH into VM: `vagrant ssh`
+
+Note: If vagrant up does not finish completely (green) there are a couple things to try. First verify that your Vagrant and vagrant-berkshelf versions are up to date. Second, if the build failed on gem install, use vagrant ssh and troubleshoot in on the box.
 
 From your host you can now use:
 
@@ -150,9 +151,9 @@ create_file 'Berksfile' do
   <<-CHEF
 site :opscode
 
-cookbook 'apt'
-cookbook 'build-essential'
-cookbook 'postgresql'
+cookbook 'apt', '~> 1.9.2'
+cookbook 'build-essential', '~> 1.4.0'
+cookbook 'postgresql', '~> 2.4.0'
 
 cookbook 'rvm',
   github: 'fnichol/chef-rvm'
