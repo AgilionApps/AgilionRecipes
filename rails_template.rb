@@ -51,9 +51,11 @@ end
 
 if yes?('Use Boostrap?')
   gem 'bootstrap-sass'
+  gem 'font-awesome-sass-rails'
   create_file 'app/assets/stylesheets/main.css.scss' do
     <<-SCSS
 @import 'bootstrap'; // Imports bootstrap to allow mixins and extends.
+@import 'font-awesome'; // Imports font awesome for font icons.
 
 #app {
 
